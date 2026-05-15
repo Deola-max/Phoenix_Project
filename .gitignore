@@ -1,0 +1,9 @@
+# Ignore Terraform secrets and state
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Ignore SSH keys (just in case)
+*.pem
+id_ed25519*

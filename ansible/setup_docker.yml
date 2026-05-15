@@ -1,0 +1,45 @@
+---
+- name: Install Docker and Deploy Weather App
+  hosts: weather_servers
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create app directory on server
+      file:
+        path: /home/ubuntu/app
+        state: directory
+        mode: '0755'
+        owner: ubuntu
+
+    - name: Copy App files to server
+      copy:
+        src: ~/Phoenix_Project/app/{{ item }}
+        dest: /home/ubuntu/app/{{ item }}
+      with_items:
+        - app.py
+        - Dockerfile
+
+    - name: Build Docker Image
+      shell: docker build -t weather-app /home/ubuntu/app
+
+    - name: Run Weather App Container
+      shell: docker run --name phoenix-container weather-app
+      register: app_output
+
+    - name: Show App Output
+      debug:
+        msg: "{{ app_output.stdout_lines }}"
